@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 
 namespace SecretHitler {
     class AIPlayer : Player {
+
         public AIPlayer() {
             IsDead = false;
             PrevPresident = false;
@@ -16,24 +17,28 @@ namespace SecretHitler {
             this.role = role;
         }
 
-        public override bool pollVote(string president, string chancellor) {
-            return true;
+        public override void pollVote(string president, string chancellor) {
+            messageQueue.Enqueue("VOTE ya");
         }
 
-        public override string nominatePlayer(List<string> candidates, string action) {
-            return candidates[0];
+        public override void nominatePlayer(List<string> candidates, string action) {
+            messageQueue.Enqueue("NOMINATE " + candidates[0]);
         }
 
-        public override POLICY chooseCard(List<POLICY> cards, string action) {
-            return cards[0];
+        public override void chooseCard(List<POLICY> cards, string action) {
+            messageQueue.Enqueue("POLICY " + action + " " + cards[0].ToString());
         }
 
         public override void notifyParty(string player, string party) {
-
+            return;
         }
 
         public override void notifyCards(List<POLICY> cards) {
+            return;
+        }
 
+        public override void notifyStart(string president) {
+            return;
         }
     }
 }

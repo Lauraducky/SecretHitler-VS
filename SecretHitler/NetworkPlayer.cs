@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net.Sockets;
@@ -7,6 +8,10 @@ using System.Threading;
 using System.Threading.Tasks;
 
 namespace SecretHitler {
+    /**
+     * Dedicated player class to send information to the player and receive
+     * their response. Response handling to be done by another party.
+     */
     class NetworkPlayer : Player {
         TcpClient client;
         NetworkStream stream;
@@ -20,6 +25,8 @@ namespace SecretHitler {
             IsDead = false;
             PrevPresident = false;
             PrevChancellor = false;
+
+            messageQueue = new ConcurrentQueue<string>();
 
             Thread responseThread = new Thread(getResponses);
             responseThread.Start();
@@ -43,13 +50,16 @@ namespace SecretHitler {
                 string[] messages = data.Split(delim);
 
                 for (int i = 0; i < messages.Length; i++) {
-                    //TODO: SEND MESSAGES BACK TO HUB
+                    messageQueue.Enqueue(messages[i]);
                 }
             } catch {
                 Console.Write("Lost connection");
             }
         }
-
+        
+        /********************
+         * MESSAGES TO SEND *
+         *******************/
         //ROLE <rolename> [hitler [fascist1, fascist2...]]
         public override void setRole(ROLE role) {
             this.role = role;
@@ -57,20 +67,17 @@ namespace SecretHitler {
         }
 
         //VOTE <president> <chancellor>
-        //VOTE <ya/nein> ***RESPONSE
         public override void pollVote(string president, string chancellor) {
             sendMessage("VOTE " + president + " " + chancellor);
         }
 
         //NOMINATE <KILL/CHECK/CHANCELLOR/PRESIDENT> <candidates>
-        //NOMINATE <KILL/CHECK/CHANCELLOR/PRESIDENT> <nominee> ***RESPONSE
         public override void nominatePlayer(List<string> candidates, string action) {
             string candidateString = string.Join(" ", candidates);
             sendMessage("NOMINATE " + action + " " + candidateString);
         }
 
         //POLICY <DISCARD/ENACT> <card1> <card2> [card3]
-        //POLICY <DISCARD/ENACT> <card> ***RESPONSE
         public override void chooseCard(List<POLICY> cards, string action) {
             string cardString = string.Join(" ", cards);
             sendMessage("POLICY " + action + " " + cardString);

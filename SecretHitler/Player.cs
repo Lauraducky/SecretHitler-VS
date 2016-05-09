@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -8,6 +9,8 @@ namespace SecretHitler {
     abstract class Player {
         protected string name;
         protected ROLE role;
+
+        public volatile ConcurrentQueue<string> messageQueue;
 
         public Player() {
             IsDead = false;

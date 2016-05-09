@@ -23,6 +23,7 @@ namespace SecretHitler {
             Server.startServer();
             //Game myGame = new Game(players);
             Console.ReadKey();
+            Server.stopAcceptingConnections();
         }
 
         static void testBoardsPolicies(GAMESIZE size) {
@@ -50,16 +51,16 @@ namespace SecretHitler {
         static Queue<TcpClient> connections;
 
         public static void startServer() {
+            acceptingConnections = true;
             Thread listenThread = new Thread(listenForClients);
             listenThread.Start();
-            handleConnections();
         }
 
         static void listenForClients() {
             TcpListener server = null;
             connections = new Queue<TcpClient>();
             try {
-                // Set the TcpListener on port 67250.
+                // Set the TcpListener on port 33333.
                 int port = 33333;
                 IPAddress localAddr = Dns.GetHostEntry("localhost").AddressList[0];
 
@@ -71,10 +72,11 @@ namespace SecretHitler {
 
                 // Enter the listening loop.
                 while (acceptingConnections) {
-                    Console.Write("Waiting for a clients... ");
+                    Console.Write("Waiting for a client... ");
                     TcpClient client = server.AcceptTcpClient();
                     Console.WriteLine("Connected!");
                     connections.Enqueue(client);
+                    startPlayer(client);
                 }
             } catch (SocketException e) {
                 Console.WriteLine("SocketException: {0}", e);
@@ -84,8 +86,24 @@ namespace SecretHitler {
             }
         }
 
-        static void handleConnections() {
+        static void startPlayer(TcpClient client) {
+            string name = "";
+            try {
+                byte[] bytes = new byte[256];
+                int bytesRead;
+                NetworkStream stream = client.GetStream();
+                bytesRead = stream.Read(bytes, 0, bytes.Length);
+                name = Encoding.ASCII.GetString(bytes, 0, bytesRead);
+            } catch {
+                Console.Write("Lost connection");
+            }
+            
+            NetworkPlayer player = new NetworkPlayer(client, name);
+            players.Add(name, player);
+        }
 
+        public static void stopAcceptingConnections() {
+            acceptingConnections = false;
         }
     }
 }
