@@ -87,5 +87,9 @@ namespace SecretHitler {
             }
             Console.WriteLine();
         }
+
+        public override void notifyStart(string president) {
+            Console.WriteLine("Starting new round with " + president + " as president.");
+        }
     }
 }

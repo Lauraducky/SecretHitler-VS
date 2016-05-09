@@ -80,6 +80,10 @@ namespace SecretHitler {
                 nextPresident++;
             }
 
+            foreach(Player current in players.Values) {
+                current.notifyStart(presCandidate);
+            }
+
             List<string> candidates = new List<string>();
             foreach (KeyValuePair<string, Player> pair in players) {
                 if(!pair.Value.IsDead && !pair.Value.PrevChancellor) {

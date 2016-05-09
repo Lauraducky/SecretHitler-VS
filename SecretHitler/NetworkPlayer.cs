@@ -11,12 +11,7 @@ namespace SecretHitler {
         NetworkStream stream;
 
         //CLIENT -> SERVER
-        //DISCARD <card>
-        //PLAY <card>
         //POWER <powername> <args>
-
-        //SERVER -> CLIENT
-        //START <president>
 
         public NetworkPlayer(TcpClient client, string name) {
             this.client = client;
@@ -42,7 +37,7 @@ namespace SecretHitler {
         }
 
         //VOTE <president> <chancellor>
-        //VOTE <ya/nein>
+        //VOTE <ya/nein> ***RESPONSE
         public override bool pollVote(string president, string chancellor) {
             sendMessage("VOTE " + president + " " + chancellor);
 
@@ -60,6 +55,7 @@ namespace SecretHitler {
         }
 
         //NOMINATE <KILL/CHECK/CHANCELLOR/PRESIDENT> <candidates>
+        //NOMINATE <KILL/CHECK/CHANCELLOR/PRESIDENT> <nominee> ***RESPONSE
         public override string nominatePlayer(List<string> candidates, string action) {
             string candidateString = string.Join(" ", candidates);
 
@@ -84,9 +80,12 @@ namespace SecretHitler {
         }
 
         //POLICY <DISCARD/ENACT> <card1> <card2> [card3]
+        //POLICY <DISCARD/ENACT> <card> ***RESPONSE
         public override POLICY chooseCard(List<POLICY> cards, string action) {
             string cardString = string.Join(" ", cards);
             sendMessage("POLICY " + action + " " + cardString);
+
+            //TODO: Get Response
 
             Console.Write("Chosen card: ");
             string card = Console.ReadLine();
@@ -110,6 +109,11 @@ namespace SecretHitler {
         public override void notifyCards(List<POLICY> cards) {
             string cardString = string.Join(" ", cards);
             sendMessage("NOTIFY CARDS " + cardString);
+        }
+
+        //START <president>
+        public override void notifyStart(string president) {
+            sendMessage("START " + president);
         }
     }
 }

@@ -9,8 +9,6 @@ namespace SecretHitlerClient {
         public enum ROLE { Liberal, Fascist, Hitler }
 
         //CLIENT -> SERVER
-        //DISCARD <card>
-        //PLAY <card>
         //VOTE <ya/nein>
         //POWER <powername> <args>
 
@@ -72,6 +70,7 @@ namespace SecretHitlerClient {
         }
         
         //NOMINATE <KILL/CHECK/CHANCELLOR/PRESIDENT> <candidates>
+        //NOMINATE <KILL/CHECK/CHANCELLOR/PRESIDENT> <nominee> ***RESPONSE
         private string promptNominate(string message) {
             char[] delim = { ' ' };
             string action;
@@ -152,7 +151,8 @@ namespace SecretHitlerClient {
             string[] cards = message.Substring(index + 1).Split(delim);
 
             string chosen = chooseCard(new List<string>(cards), action);
-            return action.ToUpper() + chosen;
+
+            return "POLICY " + action.ToUpper() + " " + chosen;
         }
 
         public string chooseCard(List<string> cards, string action) {

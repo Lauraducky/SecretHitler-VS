@@ -29,6 +29,8 @@ namespace SecretHitler {
 
         public abstract void notifyCards(List<POLICY> cards);
 
+        public abstract void notifyStart(string president);
+
         public void resetStatus() {
             PrevChancellor = false;
             PrevPresident = false;
