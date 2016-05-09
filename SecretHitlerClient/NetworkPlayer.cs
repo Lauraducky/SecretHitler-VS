@@ -79,13 +79,14 @@ namespace SecretHitlerClient {
             string command = message.Substring(0, index);
             string[] candidates = message.Substring(index + 1).Split(delim);
 
+            action = command;
             if (command == "KILL") {
                 action = "assassination";
             } else if (command == "CHECK") {
                 action = "loyalty check";
             } else if (command == "CHANCELLOR") {
                 action = "Chancellorship";
-            } else {
+            } else if (command == "PRESIDENT") {
                 action = "special election";
             }
 
@@ -121,7 +122,7 @@ namespace SecretHitlerClient {
 
             if (type == "PLAYER") {
                 index = info.IndexOf(' ');
-
+                //TODO: Finish this
             }
         }
 

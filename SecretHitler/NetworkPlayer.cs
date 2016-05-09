@@ -8,24 +8,45 @@ using System.Threading.Tasks;
 namespace SecretHitler {
     class NetworkPlayer : Player {
         TcpClient client;
+        NetworkStream stream;
+
+        //CLIENT -> SERVER
+        //DISCARD <card>
+        //PLAY <card>
+        //POWER <powername> <args>
+
+        //SERVER -> CLIENT
+        //START <president>
 
         public NetworkPlayer(TcpClient client, string name) {
             this.client = client;
             this.name = name;
+
+            stream = client.GetStream();
 
             IsDead = false;
             PrevPresident = false;
             PrevChancellor = false;
         }
 
-        public override void setRole(ROLE role) {
-            this.role = role;
-            //TODO: NOTIFY PLAYERS OF THEIR ROLE
+        private void sendMessage(string message) {
+            byte[] msg = Encoding.ASCII.GetBytes(message + ":");
+            stream.Write(msg, 0, msg.Length);
+            stream.Flush();
         }
 
+        //ROLE <rolename> [hitler [fascist1, fascist2...]]
+        public override void setRole(ROLE role) {
+            this.role = role;
+            sendMessage("ROLE " + role.ToString());
+        }
+
+        //VOTE <president> <chancellor>
+        //VOTE <ya/nein>
         public override bool pollVote(string president, string chancellor) {
-            Console.WriteLine("[" + name + "]");
-            Console.Write(president + " nominates " + chancellor + " for chancellor. Please vote: ");
+            sendMessage("VOTE " + president + " " + chancellor);
+
+            //TODO: Get response
             string answer = Console.ReadLine();
 
             while (answer != "ya" && answer != "nein") {
@@ -38,9 +59,13 @@ namespace SecretHitler {
             return false;
         }
 
+        //NOMINATE <KILL/CHECK/CHANCELLOR/PRESIDENT> <candidates>
         public override string nominatePlayer(List<string> candidates, string action) {
-            Console.WriteLine("[" + name + "]");
-            Console.Write("Candidates for " + action + ": ");
+            string candidateString = string.Join(" ", candidates);
+
+            sendMessage("NOMINATE " + action + " " + candidateString);
+
+            //TODO: Get response
             for (int i = 0; i < candidates.Count; i++) {
                 if (i != 0) Console.Write(", ");
                 Console.Write(candidates[i]);
@@ -58,14 +83,10 @@ namespace SecretHitler {
             return nominee;
         }
 
+        //POLICY <DISCARD/ENACT> <card1> <card2> [card3]
         public override POLICY chooseCard(List<POLICY> cards, string action) {
-            Console.WriteLine("[" + name + "]");
-            Console.WriteLine("Please choose a card to " + action + ".");
-            for (int i = 0; i < cards.Count; i++) {
-                if (i != 0) Console.Write(", ");
-                Console.Write(cards[i].ToString());
-            }
-            Console.WriteLine();
+            string cardString = string.Join(" ", cards);
+            sendMessage("POLICY " + action + " " + cardString);
 
             Console.Write("Chosen card: ");
             string card = Console.ReadLine();
@@ -81,19 +102,14 @@ namespace SecretHitler {
             return chosen;
         }
 
+        //NOTIFY <CARDS/PLAYER> <args>
         public override void notifyParty(string player, string party) {
-            Console.WriteLine("[" + name + "]");
-            Console.WriteLine(player + " is in the " + party + " party.");
+            sendMessage("NOTIFY PLAYER " + party);
         }
 
         public override void notifyCards(List<POLICY> cards) {
-            Console.WriteLine("[" + name + "]");
-            Console.Write("Next 3 cards: ");
-            for (int i = 0; i < cards.Count; i++) {
-                if (i != 0) Console.Write(", ");
-                Console.Write(cards[i].ToString());
-            }
-            Console.WriteLine();
+            string cardString = string.Join(" ", cards);
+            sendMessage("NOTIFY CARDS " + cardString);
         }
     }
 }

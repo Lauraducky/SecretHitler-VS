@@ -121,11 +121,11 @@ namespace SecretHitler {
 
         private void choosePolicy() {
             List<POLICY> cards = policies.drawCards(3);
-            POLICY discard = players[president].chooseCard(cards, "discard");
+            POLICY discard = players[president].chooseCard(cards, "DISCARD");
             cards.Remove(discard);
             policies.discard(discard);
             
-            POLICY toPlay = players[chancellor].chooseCard(cards, "enact");
+            POLICY toPlay = players[chancellor].chooseCard(cards, "ENACT");
             cards.Remove(toPlay);
 
             POWER current = boards.playCard(toPlay);
@@ -163,19 +163,19 @@ namespace SecretHitler {
 
             switch (power) {
                 case POWER.Assassination:
-                    string target = players[president].nominatePlayer(candidates, "assassination");
+                    string target = players[president].nominatePlayer(candidates, "KILL");
                     Console.WriteLine(target + " was killed by " + president + ".");
                     players[target].IsDead = true;
                     break;
                 case POWER.LoyaltyCheck:
-                    string player = players[president].nominatePlayer(candidates, "loyalty check");
+                    string player = players[president].nominatePlayer(candidates, "CHECK");
                     players[president].notifyParty(player, players[player].Party);
                     break;
                 case POWER.PolicyCheck:
                     players[president].notifyCards(policies.showTopThree());
                     break;
                 case POWER.SpecialElection:
-                    specialCandidate = players[president].nominatePlayer(candidates, "special election");
+                    specialCandidate = players[president].nominatePlayer(candidates, "PRESIDENT");
                     specialElection = true;
                     break;
             }
