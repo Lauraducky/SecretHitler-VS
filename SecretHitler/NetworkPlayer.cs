@@ -3,15 +3,13 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Net.Sockets;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace SecretHitler {
     class NetworkPlayer : Player {
         TcpClient client;
         NetworkStream stream;
-
-        //CLIENT -> SERVER
-        //POWER <powername> <args>
 
         public NetworkPlayer(TcpClient client, string name) {
             this.client = client;
@@ -22,12 +20,34 @@ namespace SecretHitler {
             IsDead = false;
             PrevPresident = false;
             PrevChancellor = false;
+
+            Thread responseThread = new Thread(getResponses);
+            responseThread.Start();
         }
 
         private void sendMessage(string message) {
             byte[] msg = Encoding.ASCII.GetBytes(message + ":");
             stream.Write(msg, 0, msg.Length);
             stream.Flush();
+        }
+
+        private void getResponses() {
+            try {
+                byte[] bytes = new byte[256];
+                int bytesRead;
+                string data = null;
+
+                bytesRead = stream.Read(bytes, 0, bytes.Length);
+                data = Encoding.ASCII.GetString(bytes, 0, bytesRead);
+                char[] delim = { ':' };
+                string[] messages = data.Split(delim);
+
+                for (int i = 0; i < messages.Length; i++) {
+                    //TODO: SEND MESSAGES BACK TO HUB
+                }
+            } catch {
+                Console.Write("Lost connection");
+            }
         }
 
         //ROLE <rolename> [hitler [fascist1, fascist2...]]
@@ -38,67 +58,22 @@ namespace SecretHitler {
 
         //VOTE <president> <chancellor>
         //VOTE <ya/nein> ***RESPONSE
-        public override bool pollVote(string president, string chancellor) {
+        public override void pollVote(string president, string chancellor) {
             sendMessage("VOTE " + president + " " + chancellor);
-
-            //TODO: Get response
-            string answer = Console.ReadLine();
-
-            while (answer != "ya" && answer != "nein") {
-                Console.Write("Please vote: ");
-                answer = Console.ReadLine();
-            }
-            if (answer == "ya") {
-                return true;
-            }
-            return false;
         }
 
         //NOMINATE <KILL/CHECK/CHANCELLOR/PRESIDENT> <candidates>
         //NOMINATE <KILL/CHECK/CHANCELLOR/PRESIDENT> <nominee> ***RESPONSE
-        public override string nominatePlayer(List<string> candidates, string action) {
+        public override void nominatePlayer(List<string> candidates, string action) {
             string candidateString = string.Join(" ", candidates);
-
             sendMessage("NOMINATE " + action + " " + candidateString);
-
-            //TODO: Get response
-            for (int i = 0; i < candidates.Count; i++) {
-                if (i != 0) Console.Write(", ");
-                Console.Write(candidates[i]);
-            }
-            Console.WriteLine();
-
-            Console.Write("Please nominate a player: ");
-            string nominee = Console.ReadLine();
-
-            while (!candidates.Contains(nominee)) {
-                Console.Write("Please nominate a player: ");
-                nominee = Console.ReadLine();
-            }
-
-            return nominee;
         }
 
         //POLICY <DISCARD/ENACT> <card1> <card2> [card3]
         //POLICY <DISCARD/ENACT> <card> ***RESPONSE
-        public override POLICY chooseCard(List<POLICY> cards, string action) {
+        public override void chooseCard(List<POLICY> cards, string action) {
             string cardString = string.Join(" ", cards);
             sendMessage("POLICY " + action + " " + cardString);
-
-            //TODO: Get Response
-
-            Console.Write("Chosen card: ");
-            string card = Console.ReadLine();
-            POLICY chosen;
-
-            bool success = Enum.TryParse(card, true, out chosen);
-
-            while (!success || !cards.Contains(chosen)) {
-                Console.Write("Chosen card: ");
-                card = Console.ReadLine();
-                success = Enum.TryParse(card, true, out chosen);
-            }
-            return chosen;
         }
 
         //NOTIFY <CARDS/PLAYER> <args>

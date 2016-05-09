@@ -19,11 +19,11 @@ namespace SecretHitler {
             this.role = role;
         }
 
-        public abstract bool pollVote(string president, string chancellor);
+        public abstract void pollVote(string president, string chancellor);
 
-        public abstract string nominatePlayer(List<string> candidates, string action);
+        public abstract void nominatePlayer(List<string> candidates, string action);
 
-        public abstract POLICY chooseCard(List<POLICY> cards, string action);
+        public abstract void chooseCard(List<POLICY> cards, string action);
 
         public abstract void notifyParty(string player, string party);
 

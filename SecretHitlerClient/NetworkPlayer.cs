@@ -8,10 +8,6 @@ namespace SecretHitlerClient {
     class NetworkPlayer {
         public enum ROLE { Liberal, Fascist, Hitler }
 
-        //CLIENT -> SERVER
-        //VOTE <ya/nein>
-        //POWER <powername> <args>
-
         ROLE myRole;
         string myName;
         List<string> fascists = null;
@@ -126,6 +122,7 @@ namespace SecretHitlerClient {
         }
 
         //VOTE <president> <chancellor>
+        //VOTE <ya/nein> ***RESPONSE
         private string promptVote(string message) {
             char[] delim = { ' ' };
             string[] players = message.Split(delim);
@@ -143,6 +140,7 @@ namespace SecretHitlerClient {
         }
 
         //POLICY <DISCARD/ENACT> <card1> <card2> [card3]
+        //POLICY <DISCARD/ENACT> <card> ***RESPONSE
         private string promptPolicy(string message) {
             char[] delim = { ' ' };
             int index = message.IndexOf(' ');

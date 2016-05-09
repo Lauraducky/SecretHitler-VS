@@ -8,7 +8,7 @@ namespace SecretHitler {
     class Game {
         private PoliciesDeck policies = new PoliciesDeck();
         private GameBoards boards;
-        private Dictionary<string, Player> players;
+        private Dictionary<string, ConsolePlayer> players;
         private int numPlayers;
         private GAMESIZE size;
 
@@ -21,7 +21,7 @@ namespace SecretHitler {
         private bool specialElection = false;
         private string specialCandidate;
 
-        public Game (Dictionary<string, Player> players) {
+        public Game (Dictionary<string, ConsolePlayer> players) {
             this.players = players;
             roster = new List<string>(players.Keys);
             roster.Shuffle();
@@ -40,7 +40,7 @@ namespace SecretHitler {
             boards = new GameBoards(size);
 
             List<string> temp = new List<string>(players.Keys);
-            players = new Dictionary<string, Player>();
+            players = new Dictionary<string, ConsolePlayer>();
 
             int numFascists;
 
@@ -80,12 +80,12 @@ namespace SecretHitler {
                 nextPresident++;
             }
 
-            foreach(Player current in players.Values) {
+            foreach(ConsolePlayer current in players.Values) {
                 current.notifyStart(presCandidate);
             }
 
             List<string> candidates = new List<string>();
-            foreach (KeyValuePair<string, Player> pair in players) {
+            foreach (KeyValuePair<string, ConsolePlayer> pair in players) {
                 if(!pair.Value.IsDead && !pair.Value.PrevChancellor) {
                     if (size != GAMESIZE.Small) {
                         if (!pair.Value.PrevPresident)
@@ -102,7 +102,7 @@ namespace SecretHitler {
             Console.WriteLine("Voting phase. Vote 'ya' for yes, and 'nein' for no.");
 
             int voteCount = 0;
-            foreach(Player current in players.Values) {
+            foreach(ConsolePlayer current in players.Values) {
                 if (!current.IsDead) {
                     if (current.pollVote(presCandidate, chanCandidate)) {
                         voteCount++;
@@ -147,7 +147,7 @@ namespace SecretHitler {
         }
 
         private void resolveRound() {
-            foreach (Player current in players.Values) {
+            foreach (ConsolePlayer current in players.Values) {
                 current.resetStatus();
             }
             players[president].PrevPresident = true;
@@ -158,7 +158,7 @@ namespace SecretHitler {
 
         private void resolvePower(POWER power) {
             List<string> candidates = new List<string>();
-            foreach (KeyValuePair<string, Player> pair in players) {
+            foreach (KeyValuePair<string, ConsolePlayer> pair in players) {
                 if(!pair.Value.IsDead) {
                     candidates.Add(pair.Key);
                 }
