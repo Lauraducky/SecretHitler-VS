@@ -47,45 +47,58 @@ namespace SecretHitler {
     }
 
     static class Server {
+        const int portNum = 33333;
         static bool acceptingConnections = true;
         static Dictionary<string, NetworkPlayer> players;
-        static Queue<TcpClient> connections;
+
+        delegate void mThread(ref bool isRunning);
+        delegate void AccptTcpClnt(ref TcpClient client, TcpListener listener);
 
         public static void startServer() {
+            players = new Dictionary<string, NetworkPlayer>();
             acceptingConnections = true;
-            Thread listenThread = new Thread(listenForClients);
-            listenThread.Start();
+            mThread t = new mThread(StartListening);
+            Thread masterThread = new Thread(() => t(ref acceptingConnections));
+            masterThread.IsBackground = true; //better to run it as a background thread
+            masterThread.Start();
         }
 
-        static void listenForClients() {
-            players = new Dictionary<string, NetworkPlayer>();
-            TcpListener server = null;
-            connections = new Queue<TcpClient>();
+        public static void AccptClnt(ref TcpClient client, TcpListener listener) {
+            if (client == null)
+                client = listener.AcceptTcpClient();
+        }
+
+        public static void StartListening(ref bool isRunning) {
+            TcpListener listener = new TcpListener(new IPEndPoint(IPAddress.Any, portNum));
+
             try {
-                // Set the TcpListener on port 33333.
-                int port = 33333;
-                IPAddress localAddr = Dns.GetHostEntry("localhost").AddressList[0];
+                listener.Start();
 
-                // TcpListener server = new TcpListener(port);
-                server = new TcpListener(IPAddress.Any, port);
+                TcpClient handler = null;
+                while (isRunning) {
+                    AccptTcpClnt t = new AccptTcpClnt(AccptClnt);
 
-                // Start listening for client requests.
-                server.Start();
+                    Thread tt = new Thread(() => t(ref handler, listener));
+                    tt.IsBackground = true;
+                    tt.Start(); //the AcceptTcpClient() is a blocking method, so we are invoking it    in a seperate thread so that we can break the while loop wher isRunning becomes false
 
-                // Enter the listening loop.
-                while (acceptingConnections) {
-                    Console.Write("Waiting for a client... ");
-                    TcpClient client = server.AcceptTcpClient();
-                    Console.WriteLine("Connected!");
-                    connections.Enqueue(client);
-                    startPlayer(client);
+                    while (isRunning && tt.IsAlive && handler == null)
+                        Thread.Sleep(500); //change the time as you prefer
+
+
+                    if (handler != null) {
+                        //handle the accepted connection here
+                        startPlayer(handler);
+                        handler = null;
+                    } else if (!isRunning && tt.IsAlive) {
+                        tt.Abort();
+                    }
                 }
-            } catch (SocketException e) {
-                Console.WriteLine("SocketException: {0}", e);
-            } finally {
-                // Stop listening for new clients.
-                server.Stop();
+                listener.Stop();
+            } catch (Exception e) {
+                Console.WriteLine(e.ToString());
             }
+
         }
 
         static void startPlayer(TcpClient client) {
