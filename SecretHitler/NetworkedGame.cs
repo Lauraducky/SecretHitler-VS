@@ -21,8 +21,8 @@ namespace SecretHitler {
         private bool specialElection = false;
         private string specialCandidate;
 
-        public NetworkedGame(Dictionary<string, NetworkPlayer> players) {
-            this.players = players;
+        public NetworkedGame(Dictionary<string, NetworkPlayer> newPlayers) {
+            this.players = newPlayers;
             roster = new List<string>(players.Keys);
             roster.Shuffle();
             nextPresident = 0;
@@ -40,7 +40,6 @@ namespace SecretHitler {
             boards = new GameBoards(size);
 
             List<string> temp = new List<string>(players.Keys);
-            players = new Dictionary<string, NetworkPlayer>();
 
             int numFascists;
 

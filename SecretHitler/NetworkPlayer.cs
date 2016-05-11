@@ -44,16 +44,17 @@ namespace SecretHitler {
                 int bytesRead;
                 string data = null;
 
-                bytesRead = stream.Read(bytes, 0, bytes.Length);
-                data = Encoding.ASCII.GetString(bytes, 0, bytesRead);
-                char[] delim = { ':' };
-                string[] messages = data.Split(delim);
+                while ((bytesRead = stream.Read(bytes, 0, bytes.Length)) > 0) {
+                    data = Encoding.ASCII.GetString(bytes, 0, bytesRead);
+                    char[] delim = { ':' };
+                    string[] messages = data.Split(delim);
 
-                for (int i = 0; i < messages.Length; i++) {
-                    messageQueue.Enqueue(messages[i]);
+                    for (int i = 0; i < messages.Length; i++) {
+                        messageQueue.Enqueue(messages[i]);
+                    }
                 }
             } catch {
-                Console.Write("Lost connection");
+                Console.WriteLine("Lost connection");
             }
         }
         

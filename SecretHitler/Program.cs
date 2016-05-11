@@ -24,6 +24,7 @@ namespace SecretHitler {
             //Game myGame = new Game(players);
             Console.ReadKey();
             Server.stopAcceptingConnections();
+            NetworkedGame myGame = new NetworkedGame(Server.getPlayers());
         }
 
         static void testBoardsPolicies(GAMESIZE size) {
@@ -47,7 +48,7 @@ namespace SecretHitler {
 
     static class Server {
         static bool acceptingConnections = true;
-        static Dictionary<string, Player> players;
+        static Dictionary<string, NetworkPlayer> players;
         static Queue<TcpClient> connections;
 
         public static void startServer() {
@@ -57,6 +58,7 @@ namespace SecretHitler {
         }
 
         static void listenForClients() {
+            players = new Dictionary<string, NetworkPlayer>();
             TcpListener server = null;
             connections = new Queue<TcpClient>();
             try {
@@ -65,7 +67,7 @@ namespace SecretHitler {
                 IPAddress localAddr = Dns.GetHostEntry("localhost").AddressList[0];
 
                 // TcpListener server = new TcpListener(port);
-                server = new TcpListener(localAddr, port);
+                server = new TcpListener(IPAddress.Any, port);
 
                 // Start listening for client requests.
                 server.Start();
@@ -95,7 +97,7 @@ namespace SecretHitler {
                 bytesRead = stream.Read(bytes, 0, bytes.Length);
                 name = Encoding.ASCII.GetString(bytes, 0, bytesRead);
             } catch {
-                Console.Write("Lost connection");
+                Console.WriteLine("Lost connection");
             }
             
             NetworkPlayer player = new NetworkPlayer(client, name);
@@ -104,6 +106,10 @@ namespace SecretHitler {
 
         public static void stopAcceptingConnections() {
             acceptingConnections = false;
+        }
+
+        public static Dictionary<string, NetworkPlayer> getPlayers() {
+            return new Dictionary<string, NetworkPlayer>(players);
         }
     }
 }

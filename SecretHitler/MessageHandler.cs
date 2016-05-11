@@ -22,7 +22,7 @@ namespace SecretHitler {
                 foreach (NetworkPlayer player in players.Values) {
                     while (!player.messageQueue.IsEmpty) {
                         string response = null;
-                        if(player.messageQueue.TryDequeue(out response){
+                        if(player.messageQueue.TryDequeue(out response)){
                             parseResponse(response);
                         }
                     }
