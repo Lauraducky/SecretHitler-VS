@@ -21,7 +21,6 @@ namespace SecretHitler {
 
         static void Main(string[] args) {
             Server.startServer();
-            //Game myGame = new Game(players);
             Console.ReadKey();
             Server.stopAcceptingConnections();
             NetworkedGame myGame = new NetworkedGame(Server.getPlayers());
